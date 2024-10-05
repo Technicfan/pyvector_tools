@@ -11,19 +11,20 @@ class App(ctk.CTk):
         # root window
         self.geometry("550x575")
         self.title("vector tools")
+        self.resizable(False, False)
         self.btnDimensions = ctk.CTkSegmentedButton(self, values=["2", "3"], command=self.btnDimensions_callback)
         self.btnDimensions.set("3")
         self.btnDimensions.place(relx=0.22, rely=0.02, anchor=ctk.NW)
         self.lbl1 = ctk.CTkLabel(self, text="Dimensionen: ")
         self.lbl1.place(relx=0.05, rely=0.02, anchor=ctk.NW)
         self.lbl2 = ctk.CTkLabel(self, text="MIT Licence - Copyright (c) 2024 Technicfan")
-        self.lbl2.place(relx=0.49, rely=0.02, anchor=ctk.NW)
+        self.lbl2.place(relx=0.95, rely=0.02, anchor=ctk.NE)
         self.btnClose = ctk.CTkButton(self, text="Beenden", command=self.quit, width=75)
         self.btnClose.place(relx=0.98, rely=0.978, anchor=ctk.SE)
         self.btnGithub = ctk.CTkButton(self, text="https://github.com/Technicfan/pyvector_tools", 
                                         command=self.btnGithub_callback, fg_color="transparent", hover=False,
                                         text_color="#2fa572")
-        self.btnGithub.place(relx=0.505, rely=0.995, anchor=ctk.SE)
+        self.btnGithub.place(relx=0.005, rely=0.995, anchor=ctk.SW)
 
         # tabview
         self.tab_view = ctk.CTkTabview(master=self, width=500, height=480)

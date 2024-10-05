@@ -6,6 +6,7 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         # color scheme
+        ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("green")
 
         # root window

@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import webbrowser as wb
 import vector_tools
 
 class App(ctk.CTk):
@@ -8,17 +9,25 @@ class App(ctk.CTk):
         ctk.set_default_color_theme("green")
 
         # root window
-        self.geometry("550x550")
+        self.geometry("550x575")
         self.title("vector tools")
-        self.cbDimensions = ctk.CTkComboBox(self, values=["2", "3"], state="readonly", width=55, command=self.cbDimensions_callback)
-        self.cbDimensions.set("3")
-        self.cbDimensions.place(relx=0.22, rely=0.02, anchor=ctk.NW)
+        self.btnDimensions = ctk.CTkSegmentedButton(self, values=["2", "3"], command=self.btnDimensions_callback)
+        self.btnDimensions.set("3")
+        self.btnDimensions.place(relx=0.22, rely=0.02, anchor=ctk.NW)
         self.lbl1 = ctk.CTkLabel(self, text="Dimensionen: ")
         self.lbl1.place(relx=0.05, rely=0.02, anchor=ctk.NW)
+        self.lbl2 = ctk.CTkLabel(self, text="MIT Licence - Copyright (c) 2024 Technicfan")
+        self.lbl2.place(relx=0.49, rely=0.02, anchor=ctk.NW)
+        self.btnClose = ctk.CTkButton(self, text="Beenden", command=self.quit, width=75)
+        self.btnClose.place(relx=0.98, rely=0.978, anchor=ctk.SE)
+        self.btnGithub = ctk.CTkButton(self, text="https://github.com/Technicfan/pyvector_tools", 
+                                        command=self.btnGithub_callback, fg_color="transparent", hover=False,
+                                        text_color="#2fa572")
+        self.btnGithub.place(relx=0.505, rely=0.995, anchor=ctk.SE)
 
         # tabview
         self.tab_view = ctk.CTkTabview(master=self, width=500, height=480)
-        self.tab_view.place(relx=0.5, rely=0.515, anchor=ctk.CENTER)
+        self.tab_view.place(relx=0.5, rely=0.49, anchor=ctk.CENTER)
 
         tv = self.tab_view
         tv.add("Vektor")
@@ -162,25 +171,36 @@ class App(ctk.CTk):
         tv.lblBeziehung= ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
         tv.lblBeziehung.place(relx=0.5, rely=0.78, anchor=ctk.CENTER)
 
-    def cbDimensions_callback(self, option):
+    def btnDimensions_callback(self, option):
         if option == "2":
-            self.tab_view.edtVektorz.configure(state="disabled", placeholder_text="")
-            self.tab_view.edtVektorenaz.configure(state="disabled", placeholder_text="")
-            self.tab_view.edtVektorenbz.configure(state="disabled", placeholder_text="")
-            self.tab_view.edtGeradesz.configure(state="disabled", placeholder_text="")
-            self.tab_view.edtGeraderz.configure(state="disabled", placeholder_text="")
+            self.tab_view.edtVektorz.configure(state="disabled")
+            self.tab_view.edtVektorenaz.configure(state="disabled")
+            self.tab_view.edtVektorenbz.configure(state="disabled")
+            self.tab_view.edtGeradesz.configure(state="disabled")
+            self.tab_view.edtGeraderz.configure(state="disabled")
+            self.tab_view.edtGeradenasz.configure(state="disabled")
+            self.tab_view.edtGeradenarz.configure(state="disabled")
+            self.tab_view.edtGeradenbsz.configure(state="disabled")
+            self.tab_view.edtGeradenbrz.configure(state="disabled")
         else:
-            self.tab_view.edtVektorz.configure(state="normal", placeholder_text="z")
-            self.tab_view.edtVektorenaz.configure(state="normal", placeholder_text="z")
-            self.tab_view.edtVektorenbz.configure(state="normal", placeholder_text="z")
-            self.tab_view.edtGeradesz.configure(state="normal", placeholder_text="z")
-            self.tab_view.edtGeraderz.configure(state="normal", placeholder_text="z")
+            self.tab_view.edtVektorz.configure(state="normal")
+            self.tab_view.edtVektorenaz.configure(state="normal")
+            self.tab_view.edtVektorenbz.configure(state="normal")
+            self.tab_view.edtGeradesz.configure(state="normal")
+            self.tab_view.edtGeraderz.configure(state="normal")
+            self.tab_view.edtGeradenasz.configure(state="normal")
+            self.tab_view.edtGeradenarz.configure(state="normal")
+            self.tab_view.edtGeradenbsz.configure(state="normal")
+            self.tab_view.edtGeradenbrz.configure(state="normal")
+
+    def btnGithub_callback(self):
+        wb.open(self.btnGithub.cget("text"))
 
     def btnVektor_callback(self):
         vector = []
         vector.append(self.tab_view.edtVektorx.get())
         vector.append(self.tab_view.edtVektory.get())
-        if self.cbDimensions.get() == "3":
+        if self.btnDimensions.get() == "3":
             vector.append(self.tab_view.edtVektorz.get())
         try:
             vector_obj = vector_tools.Vector(vector)
@@ -196,7 +216,7 @@ class App(ctk.CTk):
         b.append(self.tab_view.edtVektorenbx.get())
         a.append(self.tab_view.edtVektorenay.get())
         b.append(self.tab_view.edtVektorenby.get())
-        if self.cbDimensions.get() == "3":
+        if self.btnDimensions.get() == "3":
             a.append(self.tab_view.edtVektorenaz.get())
             b.append(self.tab_view.edtVektorenbz.get())
         try:
@@ -221,7 +241,7 @@ class App(ctk.CTk):
         r.append(self.tab_view.edtGeraderx.get())
         s.append(self.tab_view.edtGeradesy.get())
         r.append(self.tab_view.edtGeradery.get())
-        if self.cbDimensions.get() == "3":
+        if self.btnDimensions.get() == "3":
             s.append(self.tab_view.edtGeradesz.get())
             r.append(self.tab_view.edtGeraderz.get())
         try:
@@ -250,7 +270,7 @@ class App(ctk.CTk):
         r2.append(self.tab_view.edtGeradenbrx.get())
         s2.append(self.tab_view.edtGeradenbsy.get())
         r2.append(self.tab_view.edtGeradenbry.get())
-        if self.cbDimensions.get() == "3":
+        if self.btnDimensions.get() == "3":
             s1.append(self.tab_view.edtGeradenasz.get())
             r1.append(self.tab_view.edtGeradenarz.get())
             s2.append(self.tab_view.edtGeradenbsz.get())

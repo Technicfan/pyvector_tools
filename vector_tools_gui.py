@@ -18,7 +18,7 @@ class App(ctk.CTk):
         self.btnDimensions.place(relx=0.22, rely=0.02, anchor=ctk.NW)
         self.lbl1 = ctk.CTkLabel(self, text="Dimensionen: ")
         self.lbl1.place(relx=0.05, rely=0.02, anchor=ctk.NW)
-        self.lbl2 = ctk.CTkLabel(self, text="MIT Licence - Copyright (c) 2024 Technicfan")
+        self.lbl2 = ctk.CTkLabel(self, text="MIT License - Copyright (c) 2024 Technicfan")
         self.lbl2.place(relx=0.95, rely=0.02, anchor=ctk.NE)
         self.btnClose = ctk.CTkButton(self, text="Beenden", command=self.quit, width=75)
         self.btnClose.place(relx=0.98, rely=0.98, anchor=ctk.SE)

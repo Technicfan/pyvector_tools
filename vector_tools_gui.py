@@ -121,11 +121,11 @@ class App(ctk.CTk):
         tv.lblGerade = ctk.CTkLabel(tv.tab("Gerade"), text="")
         tv.lblGerade.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
 
-        tv.lblGeradeSpurpunkte = ctk.CTkLabel(tv.tab("Gerade"), text="")
-        tv.lblGeradeSpurpunkte.place(relx=0.5, rely=0.6, anchor=ctk.CENTER)
-
         tv.lblGeradeNormal = ctk.CTkLabel(tv.tab("Gerade"), text="")
-        tv.lblGeradeNormal.place(relx=0.5, rely=0.7, anchor=ctk.CENTER)
+        tv.lblGeradeNormal.place(relx=0.5, rely=0.6, anchor=ctk.CENTER)
+
+        tv.lblGeradeSpurpunkte = ctk.CTkLabel(tv.tab("Gerade"), text="")
+        tv.lblGeradeSpurpunkte.place(relx=0.5, rely=0.675, anchor=ctk.N)
 
         # Geradenbeziehungen
         tv.btnGeraden = ctk.CTkButton(tv.tab("Geradenbeziehungen"), text="Berechnen", command=self.btnGeraden_callback)
@@ -180,37 +180,61 @@ class App(ctk.CTk):
         tv.lblGeradenBeziehung.place(relx=0.5, rely=0.78, anchor=ctk.CENTER)
 
         tv.lblGeradenWinkel = ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
-        tv.lblGeradenWinkel.place(relx=0.5, rely=0.88, anchor=ctk.CENTER)
+        tv.lblGeradenWinkel.place(relx=0.5, rely=0.86, anchor=ctk.CENTER)
 
         tv.lblGeradenNormal = ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
-        tv.lblGeradenNormal.place(relx=0.5, rely=0.98, anchor=ctk.CENTER)
+        tv.lblGeradenNormal.place(relx=0.5, rely=0.94, anchor=ctk.CENTER)
+
+    def clear(self, tab):
+        tv = self.tab_view
+        match tab:
+            case "Vektor":
+                tv.lblVektor.configure(text="")
+                tv.lblVektorLength.configure(text="")
+                tv.lblVektorNormal.configure(text="")
+            case "Vektorbeziehungen":
+                tv.lblVektoren.configure(text="")
+                tv.lblVektorenNormal.configure(text="")
+                tv.lblVektorenSkalar.configure(text="")
+                tv.lblVektorenWinkel.configure(text="")
+            case "Gerade":
+                tv.lblGerade.configure(text="")
+                tv.lblGeradeNormal.configure(text="")
+                tv.lblGeradeSpurpunkte.configure(text="")
+            case "Geradenbeziehungen":
+                tv.lblGeraden.configure(text="")
+                tv.lblGeradenBeziehung.configure(text="")
+                tv.lblGeradenNormal.configure(text="")
+                tv.lblGeradenWinkel.configure(text="")
 
     def btnDimensions_callback(self, option):
+        tv = self.tab_view
         if option == "2":
-            self.tab_view.edtVektorz.configure(state="disabled")
-            self.tab_view.edtVektorenaz.configure(state="disabled")
-            self.tab_view.edtVektorenbz.configure(state="disabled")
-            self.tab_view.edtGeradesz.configure(state="disabled")
-            self.tab_view.edtGeraderz.configure(state="disabled")
-            self.tab_view.edtGeradenasz.configure(state="disabled")
-            self.tab_view.edtGeradenarz.configure(state="disabled")
-            self.tab_view.edtGeradenbsz.configure(state="disabled")
-            self.tab_view.edtGeradenbrz.configure(state="disabled")
+            tv.edtVektorz.configure(state="disabled")
+            tv.edtVektorenaz.configure(state="disabled")
+            tv.edtVektorenbz.configure(state="disabled")
+            tv.edtGeradesz.configure(state="disabled")
+            tv.edtGeraderz.configure(state="disabled")
+            tv.edtGeradenasz.configure(state="disabled")
+            tv.edtGeradenarz.configure(state="disabled")
+            tv.edtGeradenbsz.configure(state="disabled")
+            tv.edtGeradenbrz.configure(state="disabled")
         else:
-            self.tab_view.edtVektorz.configure(state="normal")
-            self.tab_view.edtVektorenaz.configure(state="normal")
-            self.tab_view.edtVektorenbz.configure(state="normal")
-            self.tab_view.edtGeradesz.configure(state="normal")
-            self.tab_view.edtGeraderz.configure(state="normal")
-            self.tab_view.edtGeradenasz.configure(state="normal")
-            self.tab_view.edtGeradenarz.configure(state="normal")
-            self.tab_view.edtGeradenbsz.configure(state="normal")
-            self.tab_view.edtGeradenbrz.configure(state="normal")
+            tv.edtVektorz.configure(state="normal")
+            tv.edtVektorenaz.configure(state="normal")
+            tv.edtVektorenbz.configure(state="normal")
+            tv.edtGeradesz.configure(state="normal")
+            tv.edtGeraderz.configure(state="normal")
+            tv.edtGeradenasz.configure(state="normal")
+            tv.edtGeradenarz.configure(state="normal")
+            tv.edtGeradenbsz.configure(state="normal")
+            tv.edtGeradenbrz.configure(state="normal")
 
     def btnGithub_callback(self):
         wb.open(self.btnGithub.cget("text"))
 
     def btnVektor_callback(self):
+        self.clear("Vektor")
         vector = []
         vector.append(self.tab_view.edtVektorx.get())
         vector.append(self.tab_view.edtVektory.get())
@@ -223,9 +247,10 @@ class App(ctk.CTk):
             return
         self.tab_view.lblVektor.configure(text="Vektor: " + str(vector_obj))
         self.tab_view.lblVektorLength.configure(text="Länge: " + str(vector_obj.length()) + " LE")
-        self.tab_view.lblVektorNormal.configure(text="Normalvektor: " + str(vector_obj.normal_vector()))
+        self.tab_view.lblVektorNormal.configure(text="Normalenvektor: " + str(vector_obj.normal_vector()))
 
     def btnVektoren_callback(self):
+        self.clear("Vektorbeziehungen")
         a, b = [], []
         a.append(self.tab_view.edtVektorenax.get())
         b.append(self.tab_view.edtVektorenbx.get())
@@ -243,17 +268,16 @@ class App(ctk.CTk):
         self.tab_view.lblVektorenSkalar.configure(text="Skalarprodukt: " + str(ab.skalar_product()))
         parallel = ab.kolinear()
         if parallel:
-            self.tab_view.lblVektorenWinkel.configure(text="Winkel: kolinear -> keiner")
-        elif ab.orthogonal():
-            self.tab_view.lblVektorenWinkel.configure(text="Winkel: orthogonal -> 90°")
+            self.tab_view.lblVektorenWinkel.configure(text="Winkel: 0° -> kolinear")
+        if ab.orthogonal():
+            self.tab_view.lblVektorenWinkel.configure(text="Winkel: 90° -> orthogonal")
         else:
             self.tab_view.lblVektorenWinkel.configure(text="Winkel: " + str(ab.small_angle()) + "°")
         if len(a) == 3 or parallel:
-            self.tab_view.lblVektorenNormal.configure(text="Normalvektor: " + str(ab.normal_vector()))
-        else:
-            self.tab_view.lblVektorenNormal.configure(text="")
+            self.tab_view.lblVektorenNormal.configure(text="Normalenvektor: " + str(ab.normal_vector()))
 
     def btnGerade_callback(self):
+        self.clear("Gerade")
         s, r = [], []
         s.append(self.tab_view.edtGeradesx.get())
         r.append(self.tab_view.edtGeraderx.get())
@@ -275,11 +299,10 @@ class App(ctk.CTk):
                 if point != None:
                     points.append(f"S[{location}](" + "|".join(str(i) for i in point) + ")")
             self.tab_view.lblGeradeSpurpunkte.configure(text="Spurpunkte: " + ",\n".join(i for i in points))
-        else:
-            self.tab_view.lblGeradeSpurpunkte.configure(text="")
-        self.tab_view.lblGeradeNormal.configure(text="Normalvektor: " + str(line.normal_vector()))
+        self.tab_view.lblGeradeNormal.configure(text="Normalenvektor: " + str(line.normal_vector()))
 
     def btnGeraden_callback(self):
+        self.clear("Geradenbeziehungen")
         s1, r1, s2, r2 = [], [], [], []
         s1.append(self.tab_view.edtGeradenasx.get())
         r1.append(self.tab_view.edtGeradenarx.get())
@@ -319,9 +342,7 @@ class App(ctk.CTk):
         else:
             self.tab_view.lblGeradenWinkel.configure(text="Winkel: " + str(ab.small_angle()) + "°")
         if len(s1) == 3 or result[0] in [0, 1]:
-            self.tab_view.lblGeradenNormal.configure(text="Normalvektor: " + str(ab.normal_vector()))
-        else:
-            self.tab_view.lblGeradenNormal.configure(text="")
+            self.tab_view.lblGeradenNormal.configure(text="Normalenvektor: " + str(ab.normal_vector()))
 
 if __name__ == "__main__":
     app = App()

@@ -13,7 +13,7 @@ class Tools:
 class Vector:
     """
     A class that takes a list of 2 or 3 numbers of type string, int or float forming a vector.
-    It can return the vector as string and calculate its length.
+    It can return the vector as string, calculate its length and its normal vector.
     """
     def __init__(self, coords: list):
         try:
@@ -27,31 +27,41 @@ class Vector:
             raise ValueError
 
         self.dimensions = len(self.coords)
+        if self.length() == 0:
+            self.zero = True
+        else:
+            self.zero = False
 
     def __str__(self):
         return "(" + ", ".join(str(i) for i in self.coords) + ")"
 
-    def length(self):
+    def length(self, round=True):
         under = 0
         for coord in self.coords:
             under += coord**2
-        return Tools.customround(math.sqrt(under), 2)
+        if round:
+            return Tools.customround(math.sqrt(under), 2)
+        else:
+            return decimal.Decimal(math.sqrt(under))
 
     def normal_vector(self):
-        vector = []
-        length = self.length()
-        for i in self.coords:
-            vector.append(Tools.customround(i / decimal.Decimal(length), 2))
-        return Vector(vector)
+        if self.zero:
+            return "unbestimmt"
+        else:
+            vector = []
+            length = self.length(False)
+            for i in self.coords:
+                vector.append(Tools.customround(i / length, 2))
+            return Vector(vector)
 
 class Line:
     """
     A class that takes two vectors of type Vector by me (see above for details) that
     represent the starting point and the direction of the line.
-    It can return the line as string and calculate its intersection points.
+    It can return the line as string, calculate its intersection points and its normal vector.
     """
     def __init__(self, s: Vector, r: Vector):
-        if s.dimensions != r.dimensions or r.length() == 0:
+        if s.dimensions != r.dimensions or r.zero:
             print("not same dimensions or zero vector as r")
             raise ValueError
         else:
@@ -86,33 +96,36 @@ class Vectors:
     """
     A class that takes two vectors of type Vector by me (see above for details).
     It can return them as string, calculate their skalar product, their angle, check
-    if they are orthogonal and calculate their normal vector.
+    if they are orthogonal or kolinear and calculate their normal vector.
     """
     def __init__(self, a: Vector, b: Vector):
-        if a.dimensions != b.dimensions:
-            print("not same dimensions")
+        if a.dimensions != b.dimensions or a.zero or b.zero:
+            print("not same dimensions or zero vector")
             raise ValueError
         self.a, self.b = a, b
 
     def __str__(self):
         return str(self.a) + ", " + str(self.b)
 
-    def skalar_product(self):
+    def skalar_product(self, round=True):
         product = 0
         for i, j in zip(self.a.coords, self.b.coords):
             product += i * j
-        return Tools.customround(product, 2)
+        if round:
+            return Tools.customround(product, 2)
+        else:
+            return product
 
     def orthogonal(self):
         return self.skalar_product() == 0
 
     def angle(self):
-        return Tools.customround(math.degrees(math.acos(self.skalar_product() /\
-                 (self.a.length() * self.b.length()))), 2)
+        return Tools.customround(math.degrees(math.acos(self.skalar_product(False) /\
+                 (self.a.length(False) * self.b.length(False)))), 2)
 
     def small_angle(self):
-        return Tools.customround(math.degrees(math.acos(abs(self.skalar_product() /\
-                 (self.a.length() * self.b.length())))), 2)
+        return Tools.customround(math.degrees(math.acos(abs(self.skalar_product(False) /\
+                 (self.a.length(False) * self.b.length(False))))), 2)
 
     def kolinear(self):
         i, a, b = 0, self.a.coords, self.b.coords
@@ -123,7 +136,7 @@ class Vectors:
             for one, two in zip(a[i+1:], b[i+1:]):
                 if not (one == two == 0) and one / two != first:
                     return False
-        except ZeroDivisionError:
+        except decimal.InvalidOperation:
             return False
         return True
 
@@ -133,7 +146,10 @@ class Vectors:
             x = Tools.customround(a.coords[1] * b.coords[2] - a.coords[2] * b.coords[1], 2)
             y = Tools.customround(a.coords[2] * b.coords[0] - a.coords[0] * b.coords[2], 2)
             z = Tools.customround(a.coords[0] * b.coords[1] - a.coords[1] * b.coords[0], 2)
-            return Vector([x, y, z])
+            if Vector([x, y, z]).zero:
+                return "unbestimmt"
+            else:
+                return Vector([x, y, z])
         elif self.kolinear():
             return Vector([-a.coords[0],a.coords[1]])
         else:
@@ -143,6 +159,7 @@ class Lines:
     """
     A class that takes two lines of type Line by me (see above for details).
     It can calculate the relation of the two lines (parallel/identical, crossing or nothing).
+    It can also calculate their angle, their normal vector and if they are othogonal.
     The relation function returns an array where index 0 represents the relation:
     0: identical
     1: parallel
@@ -170,7 +187,7 @@ class Lines:
             for one, two, three in zip(s1[i+1:], s2[i+1:], r2[i+1:]):
                 if not ((one - two) == three == 0) and (one - two) / three != first:
                     return False
-        except ZeroDivisionError:
+        except decimal.InvalidOperation:
             return False
         return True
 
@@ -185,7 +202,7 @@ class Lines:
             x = ( first_part[1][1] * second_part[0] - first_part[0][1] * second_part[1] ) /\
                 ( first_part[0][0] * first_part[1][1] - first_part[0][1] * first_part[1][0] )
             y = ( second_part[0] - first_part[0][0] * x ) / first_part[0][1]
-        except ZeroDivisionError:
+        except decimal.InvalidOperation:
             return False
         if len(first_part) == 3 and first_part[2][0] * x + first_part[2][1] * y != second_part[2]:
             return False

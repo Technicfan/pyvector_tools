@@ -46,7 +46,7 @@ class Vector:
 
     def normal_vector(self):
         if self.zero:
-            return "unbestimmt"
+            return self
         else:
             vector = []
             length = self.length(False)
@@ -146,10 +146,7 @@ class Vectors:
             x = Tools.customround(a.coords[1] * b.coords[2] - a.coords[2] * b.coords[1], 2)
             y = Tools.customround(a.coords[2] * b.coords[0] - a.coords[0] * b.coords[2], 2)
             z = Tools.customround(a.coords[0] * b.coords[1] - a.coords[1] * b.coords[0], 2)
-            if Vector([x, y, z]).zero:
-                return "unbestimmt"
-            else:
-                return Vector([x, y, z])
+            return Vector([x, y, z])
         elif self.kolinear():
             return Vector([-a.coords[0],a.coords[1]])
         else:

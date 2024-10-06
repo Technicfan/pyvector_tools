@@ -247,7 +247,11 @@ class App(ctk.CTk):
             return
         self.tab_view.lblVektor.configure(text="Vektor: " + str(vector_obj))
         self.tab_view.lblVektorLength.configure(text="Länge: " + str(vector_obj.length()) + " LE")
-        self.tab_view.lblVektorNormal.configure(text="Normalenvektor: " + str(vector_obj.normal_vector()))
+        normal = vector_obj.normal_vector()
+        if normal.zero:
+            self.tab_view.lblVektorNormal.configure(text="Normalenvektor: unbestimmt")
+        else:
+            self.tab_view.lblVektorNormal.configure(text="Normalenvektor: " + str(normal))
 
     def btnVektoren_callback(self):
         self.clear("Vektorbeziehungen")
@@ -274,7 +278,11 @@ class App(ctk.CTk):
         else:
             self.tab_view.lblVektorenWinkel.configure(text="Winkel: " + str(ab.small_angle()) + "°")
         if len(a) == 3 or parallel:
-            self.tab_view.lblVektorenNormal.configure(text="Normalenvektor: " + str(ab.normal_vector()))
+            normal = ab.normal_vector()
+            if normal.zero:
+                self.tab_view.lblVektorenNormal.configure(text="Normalenvektor: unbestimmt")
+            else:
+                self.tab_view.lblVektorenNormal.configure(text="Normalenvektor: " + str(normal))
 
     def btnGerade_callback(self):
         self.clear("Gerade")
@@ -299,7 +307,11 @@ class App(ctk.CTk):
                 if point != None:
                     points.append(f"S[{location}](" + "|".join(str(i) for i in point) + ")")
             self.tab_view.lblGeradeSpurpunkte.configure(text="Spurpunkte: " + ",\n".join(i for i in points))
-        self.tab_view.lblGeradeNormal.configure(text="Normalenvektor: " + str(line.normal_vector()))
+        normal = line.normal_vector()
+        if normal.zero:
+            self.tab_view.lblGeradeNormal.configure(text="Normalenvektor: unbestimmt")
+        else:
+            self.tab_view.lblGeradeNormal.configure(text="Normalenvektor: " + str(normal))
 
     def btnGeraden_callback(self):
         self.clear("Geradenbeziehungen")
@@ -342,7 +354,11 @@ class App(ctk.CTk):
         else:
             self.tab_view.lblGeradenWinkel.configure(text="Winkel: " + str(ab.small_angle()) + "°")
         if len(s1) == 3 or result[0] in [0, 1]:
-            self.tab_view.lblGeradenNormal.configure(text="Normalenvektor: " + str(ab.normal_vector()))
+            normal = ab.normal_vector()
+            if normal.zero:
+                self.tab_view.lblGeradenNormal.configure(text="Normalenvektor: unbestimmt")
+            else:
+                self.tab_view.lblGeradenNormal.configure(text="Normalenvektor: " + str(normal))
 
 if __name__ == "__main__":
     app = App()

@@ -56,6 +56,9 @@ class App(ctk.CTk):
         tv.lblVektorLength = ctk.CTkLabel(tv.tab("Vektor"), text="")
         tv.lblVektorLength.place(relx=0.5, rely=0.6, anchor=ctk.CENTER)
 
+        tv.lblVektorNormal = ctk.CTkLabel(tv.tab("Vektor"), text="")
+        tv.lblVektorNormal.place(relx=0.5, rely=0.7, anchor=ctk.CENTER)
+
         # Vektorbeziehungen
         tv.btnVektoren = ctk.CTkButton(tv.tab("Vektorbeziehungen"), text="Berechnen", command=self.btnVektoren_callback)
         tv.btnVektoren.place(relx=0.5, rely=0.3, anchor=ctk.CENTER)
@@ -81,14 +84,14 @@ class App(ctk.CTk):
         tv.lblVektoren = ctk.CTkLabel(tv.tab("Vektorbeziehungen"), text="")
         tv.lblVektoren.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
 
-        tv.lblSkalar = ctk.CTkLabel(tv.tab("Vektorbeziehungen"), text="")
-        tv.lblSkalar.place(relx=0.5, rely=0.6, anchor=ctk.CENTER)
+        tv.lblVektorenSkalar = ctk.CTkLabel(tv.tab("Vektorbeziehungen"), text="")
+        tv.lblVektorenSkalar.place(relx=0.5, rely=0.6, anchor=ctk.CENTER)
 
-        tv.lblWinkel = ctk.CTkLabel(tv.tab("Vektorbeziehungen"), text="")
-        tv.lblWinkel.place(relx=0.5, rely=0.7, anchor=ctk.CENTER)
+        tv.lblVektorenWinkel = ctk.CTkLabel(tv.tab("Vektorbeziehungen"), text="")
+        tv.lblVektorenWinkel.place(relx=0.5, rely=0.7, anchor=ctk.CENTER)
 
-        tv.lblNormal = ctk.CTkLabel(tv.tab("Vektorbeziehungen"), text="")
-        tv.lblNormal.place(relx=0.5, rely=0.8, anchor=ctk.CENTER)
+        tv.lblVektorenNormal = ctk.CTkLabel(tv.tab("Vektorbeziehungen"), text="")
+        tv.lblVektorenNormal.place(relx=0.5, rely=0.8, anchor=ctk.CENTER)
 
         # Gerade
         tv.btnGerade = ctk.CTkButton(tv.tab("Gerade"), text="Berechnen", command=self.btnGerade_callback)
@@ -118,8 +121,11 @@ class App(ctk.CTk):
         tv.lblGerade = ctk.CTkLabel(tv.tab("Gerade"), text="")
         tv.lblGerade.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
 
-        tv.lblSpurpunkte= ctk.CTkLabel(tv.tab("Gerade"), text="")
-        tv.lblSpurpunkte.place(relx=0.5, rely=0.6, anchor=ctk.CENTER)
+        tv.lblGeradeSpurpunkte = ctk.CTkLabel(tv.tab("Gerade"), text="")
+        tv.lblGeradeSpurpunkte.place(relx=0.5, rely=0.6, anchor=ctk.CENTER)
+
+        tv.lblGeradeNormal = ctk.CTkLabel(tv.tab("Gerade"), text="")
+        tv.lblGeradeNormal.place(relx=0.5, rely=0.7, anchor=ctk.CENTER)
 
         # Geradenbeziehungen
         tv.btnGeraden = ctk.CTkButton(tv.tab("Geradenbeziehungen"), text="Berechnen", command=self.btnGeraden_callback)
@@ -170,8 +176,14 @@ class App(ctk.CTk):
         tv.lblGeraden = ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
         tv.lblGeraden.place(relx=0.5, rely=0.68, anchor=ctk.CENTER)
 
-        tv.lblBeziehung= ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
-        tv.lblBeziehung.place(relx=0.5, rely=0.78, anchor=ctk.CENTER)
+        tv.lblGeradenBeziehung= ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
+        tv.lblGeradenBeziehung.place(relx=0.5, rely=0.78, anchor=ctk.CENTER)
+
+        tv.lblGeradenWinkel = ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
+        tv.lblGeradenWinkel.place(relx=0.5, rely=0.88, anchor=ctk.CENTER)
+
+        tv.lblGeradenNormal = ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
+        tv.lblGeradenNormal.place(relx=0.5, rely=0.98, anchor=ctk.CENTER)
 
     def btnDimensions_callback(self, option):
         if option == "2":
@@ -211,6 +223,7 @@ class App(ctk.CTk):
             return
         self.tab_view.lblVektor.configure(text="Vektor: " + str(vector_obj))
         self.tab_view.lblVektorLength.configure(text="Länge: " + str(vector_obj.length()) + " LE")
+        self.tab_view.lblVektorNormal.configure(text="Normalvektor: " + str(vector_obj.normal_vector()))
 
     def btnVektoren_callback(self):
         a, b = [], []
@@ -227,15 +240,18 @@ class App(ctk.CTk):
             self.tab_view.lblVektoren.configure(text="wrong input")
             return
         self.tab_view.lblVektoren.configure(text="Vektoren: " + str(ab))
-        self.tab_view.lblSkalar.configure(text="Skalarprodukt: " + str(ab.skalar_product()))
-        if ab.orthogonal():
-            self.tab_view.lblWinkel.configure(text="Winkel: 90° -> orthogonal")
+        self.tab_view.lblVektorenSkalar.configure(text="Skalarprodukt: " + str(ab.skalar_product()))
+        parallel = ab.kolinear()
+        if parallel:
+            self.tab_view.lblVektorenWinkel.configure(text="Winkel: kolinear -> keiner")
+        elif ab.orthogonal():
+            self.tab_view.lblVektorenWinkel.configure(text="Winkel: orthogonal -> 90°")
         else:
-            self.tab_view.lblWinkel.configure(text="Winkel: " + str(ab.small_angle()) + "°")
-        if len(a) == 3:
-            self.tab_view.lblNormal.configure(text="Normalvektor: " + str(ab.normal_vector()))
+            self.tab_view.lblVektorenWinkel.configure(text="Winkel: " + str(ab.small_angle()) + "°")
+        if len(a) == 3 or parallel:
+            self.tab_view.lblVektorenNormal.configure(text="Normalvektor: " + str(ab.normal_vector()))
         else:
-            self.tab_view.lblNormal.configure(text="")
+            self.tab_view.lblVektorenNormal.configure(text="")
 
     def btnGerade_callback(self):
         s, r = [], []
@@ -258,9 +274,10 @@ class App(ctk.CTk):
             for point, location in zip(line.intersections(), flaechen):
                 if point != None:
                     points.append(f"S[{location}](" + "|".join(str(i) for i in point) + ")")
-            self.tab_view.lblSpurpunkte.configure(text="Spurpunkte: " + ",\n".join(i for i in points))
+            self.tab_view.lblGeradeSpurpunkte.configure(text="Spurpunkte: " + ",\n".join(i for i in points))
         else:
-            self.tab_view.lblSpurpunkte.configure(text="")
+            self.tab_view.lblGeradeSpurpunkte.configure(text="")
+        self.tab_view.lblGeradeNormal.configure(text="Normalvektor: " + str(line.normal_vector()))
 
     def btnGeraden_callback(self):
         s1, r1, s2, r2 = [], [], [], []
@@ -296,7 +313,15 @@ class App(ctk.CTk):
                             "|".join(str(i) for i in result[1]) + ")."
             case 3:
                 relation = "Die Geraden sind windschief."
-        self.tab_view.lblBeziehung.configure(text=relation)
+        self.tab_view.lblGeradenBeziehung.configure(text=relation)
+        if ab.orthogonal():
+            self.tab_view.lblGeradenWinkel.configure(text="Winkel: 90°")
+        else:
+            self.tab_view.lblGeradenWinkel.configure(text="Winkel: " + str(ab.small_angle()) + "°")
+        if len(s1) == 3 or result[0] in [0, 1]:
+            self.tab_view.lblGeradenNormal.configure(text="Normalvektor: " + str(ab.normal_vector()))
+        else:
+            self.tab_view.lblGeradenNormal.configure(text="")
 
 if __name__ == "__main__":
     app = App()

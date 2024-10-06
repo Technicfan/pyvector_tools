@@ -2,7 +2,7 @@ import math
 import decimal
 
 class Tools:
-    def customround(number, decimals):
+    def customround(number, decimals=None):
         rounded = float(round(number, decimals))
         part = rounded - int(number)
         if part != 0:
@@ -36,6 +36,13 @@ class Vector:
         for coord in self.coords:
             under += coord**2
         return Tools.customround(math.sqrt(under), 2)
+
+    def normal_vector(self):
+        vector = []
+        length = self.length()
+        for i in self.coords:
+            vector.append(Tools.customround(i / decimal.Decimal(length), 2))
+        return Vector(vector)
 
 class Line:
     """
@@ -72,6 +79,9 @@ class Line:
                 points.append(self.__intersection_point(i))
             return points
 
+    def normal_vector(self):
+        return self.r.normal_vector()
+
 class Vectors:
     """
     A class that takes two vectors of type Vector by me (see above for details).
@@ -101,8 +111,21 @@ class Vectors:
                  (self.a.length() * self.b.length()))), 2)
 
     def small_angle(self):
-        return Tools.customround(math.degrees(math.acos(abs(self.skalar_product()) /\
-                 (self.a.length() * self.b.length()))), 2)
+        return Tools.customround(math.degrees(math.acos(abs(self.skalar_product() /\
+                 (self.a.length() * self.b.length())))), 2)
+
+    def kolinear(self):
+        i, a, b = 0, self.a.coords, self.b.coords
+        while i < len(a) - 1 and a[i] == b[i] == 0:
+            i += 1
+        try:
+            first = a[i] / b[i]
+            for one, two in zip(a[i+1:], b[i+1:]):
+                if not (one == two == 0) and one / two != first:
+                    return False
+        except ZeroDivisionError:
+            return False
+        return True
 
     def normal_vector(self):
         a, b = self.a, self.b
@@ -111,6 +134,8 @@ class Vectors:
             y = Tools.customround(a.coords[2] * b.coords[0] - a.coords[0] * b.coords[2], 2)
             z = Tools.customround(a.coords[0] * b.coords[1] - a.coords[1] * b.coords[0], 2)
             return Vector([x, y, z])
+        elif self.kolinear():
+            return Vector([-a.coords[0],a.coords[1]])
         else:
             return None
 
@@ -134,17 +159,7 @@ class Lines:
         return str(self.a) + ", " + str(self.b).replace("r", "s")
 
     def parallel(self):
-        i, r1, r2 = 0, self.a.r.coords, self.b.r.coords
-        while i < len(r1) - 1 and r1[i] == r2[i] == 0:
-            i += 1
-        try:
-            first = r1[i] / r2[i]
-            for one, two in zip(r1[i+1:], r2[i+1:]):
-                if not (one == two == 0) and one / two != first:
-                    return False
-        except ZeroDivisionError:
-            return False
-        return True
+        return Vectors(self.a.r, self.b.r).kolinear()
 
     def identical(self):
         i, s1, s2, r2 = 0, self.a.s.coords, self.b.s.coords, self.b.r.coords
@@ -192,3 +207,15 @@ class Lines:
                 return [2, result]
             else:
                 return [3]
+
+    def orthogonal(self):
+        return Vectors(self.a.r, self.b.r).orthogonal()
+
+    def angle(self):
+        return Vectors(self.a.r, self.b.r).angle()
+
+    def small_angle(self):
+        return Vectors(self.a.r, self.b.r).small_angle()
+
+    def normal_vector(self):
+        return Vectors(self.a.r, self.b.r).normal_vector()

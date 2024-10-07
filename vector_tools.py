@@ -18,11 +18,11 @@ class Vector:
     def __init__(self, coords: list):
         try:
             if len(coords) not in [2,3]:
-                raise decimal.InvalidOperation
+                raise decimal.DivisionByZero
             self.coords = []
             for i in coords:
                 self.coords.append(decimal.Decimal(str(i)))
-        except decimal.InvalidOperation:
+        except decimal.DivisionByZero:
             print("wrong type or length")
             raise ValueError
 
@@ -48,11 +48,23 @@ class Vector:
         if self.zero:
             return self
         else:
-            vector = []
-            length = self.length(False)
-            for i in self.coords:
-                vector.append(Tools.customround(i / length, 2))
-            return Vector(vector)
+            if self.dimensions == 3:
+                if self.coords[2] != 0:
+                    x = 1
+                    y = 0
+                    z = Tools.customround(-self.coords[0] / self.coords[2], 2)
+                else:
+                    if self.coords[1] != 0:
+                        x = 1
+                        y = Tools.customround(-self.coords[0] / self.coords[1], 2)
+                        z = 0
+                    else:
+                        x = 0
+                        y = 1
+                        z = 0
+                return Vector([x, y, z])
+            else:
+                return Vector([-self.coords[1], self.coords[0]])
 
 class Line:
     """
@@ -95,7 +107,7 @@ class Line:
 class Vectors:
     """
     A class that takes two vectors of type Vector by me (see above for details).
-    It can return them as string, calculate their skalar product, their angle, check
+    It can return them as string, calculate their dot product, their angle, check
     if they are orthogonal or kolinear and calculate their normal vector.
     """
     def __init__(self, a: Vector, b: Vector):
@@ -107,7 +119,7 @@ class Vectors:
     def __str__(self):
         return str(self.a) + ", " + str(self.b)
 
-    def skalar_product(self, round=True):
+    def dot_product(self, round=True):
         product = 0
         for i, j in zip(self.a.coords, self.b.coords):
             product += i * j
@@ -117,14 +129,14 @@ class Vectors:
             return product
 
     def orthogonal(self):
-        return self.skalar_product() == 0
+        return self.dot_product() == 0
 
     def angle(self):
-        return Tools.customround(math.degrees(math.acos(self.skalar_product(False) /\
+        return Tools.customround(math.degrees(math.acos(self.dot_product(False) /\
                  (self.a.length(False) * self.b.length(False)))), 2)
 
     def small_angle(self):
-        return Tools.customround(math.degrees(math.acos(abs(self.skalar_product(False) /\
+        return Tools.customround(math.degrees(math.acos(abs(self.dot_product(False) /\
                  (self.a.length(False) * self.b.length(False))))), 2)
 
     def kolinear(self):
@@ -136,19 +148,20 @@ class Vectors:
             for one, two in zip(a[i+1:], b[i+1:]):
                 if not (one == two == 0) and one / two != first:
                     return False
-        except decimal.InvalidOperation:
+        except decimal.DivisionByZero:
             return False
         return True
 
     def normal_vector(self):
         a, b = self.a, self.b
-        if a.dimensions == 3:
+        parallel = self.kolinear()
+        if parallel:
+                return a.normal_vector()
+        elif a.dimensions == 3:
             x = Tools.customround(a.coords[1] * b.coords[2] - a.coords[2] * b.coords[1], 2)
             y = Tools.customround(a.coords[2] * b.coords[0] - a.coords[0] * b.coords[2], 2)
             z = Tools.customround(a.coords[0] * b.coords[1] - a.coords[1] * b.coords[0], 2)
             return Vector([x, y, z])
-        elif self.kolinear():
-            return Vector([-a.coords[0],a.coords[1]])
         else:
             return None
 
@@ -184,7 +197,7 @@ class Lines:
             for one, two, three in zip(s1[i+1:], s2[i+1:], r2[i+1:]):
                 if not ((one - two) == three == 0) and (one - two) / three != first:
                     return False
-        except decimal.InvalidOperation:
+        except decimal.DivisionByZero:
             return False
         return True
 
@@ -199,7 +212,7 @@ class Lines:
             x = ( first_part[1][1] * second_part[0] - first_part[0][1] * second_part[1] ) /\
                 ( first_part[0][0] * first_part[1][1] - first_part[0][1] * first_part[1][0] )
             y = ( second_part[0] - first_part[0][0] * x ) / first_part[0][1]
-        except decimal.InvalidOperation:
+        except decimal.DivisionByZero:
             return False
         if len(first_part) == 3 and first_part[2][0] * x + first_part[2][1] * y != second_part[2]:
             return False

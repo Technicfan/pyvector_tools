@@ -22,9 +22,8 @@ class Vector:
             self.coords = []
             for i in coords:
                 self.coords.append(decimal.Decimal(str(i)))
-        except decimal.DivisionByZero:
-            print("wrong type or length")
-            raise ValueError
+        except (decimal.DivisionByZero, decimal.InvalidOperation):
+            raise ValueError("wrong type or length")
 
         self.dimensions = len(self.coords)
         if self.length() == 0:
@@ -66,44 +65,6 @@ class Vector:
             else:
                 return Vector([-self.coords[1], self.coords[0]])
 
-class Line:
-    """
-    A class that takes two vectors of type Vector by me (see above for details) that
-    represent the starting point and the direction of the line.
-    It can return the line as string, calculate its intersection points and its normal vector.
-    """
-    def __init__(self, s: Vector, r: Vector):
-        if s.dimensions != r.dimensions or r.zero:
-            print("not same dimensions or zero vector as r")
-            raise ValueError
-        else:
-            self.s, self.r = s, r
-
-    def __str__(self):
-        return str(self.s) + " + r * " + str(self.r)
-
-    def __intersection_point(self, index):
-        if self.r.coords[index] != 0:
-            point = []
-            location = -self.s.coords[index] / self.r.coords[index]
-            for i, j in zip(self.s.coords, self.r.coords):
-                point.append(Tools.customround(i + location * j, 2))
-            return point
-        else:
-            return None
-
-    def intersections(self):
-        if self.s.dimensions == 2:
-            return False
-        else:
-            points = []
-            for i in range(2, -1, -1):
-                points.append(self.__intersection_point(i))
-            return points
-
-    def normal_vector(self):
-        return self.r.normal_vector()
-
 class Vectors:
     """
     A class that takes two vectors of type Vector by me (see above for details).
@@ -112,8 +73,7 @@ class Vectors:
     """
     def __init__(self, a: Vector, b: Vector):
         if a.dimensions != b.dimensions or a.zero or b.zero:
-            print("not same dimensions or zero vector")
-            raise ValueError
+            raise ValueError("not same dimensions or zero vector")
         self.a, self.b = a, b
 
     def __str__(self):
@@ -165,21 +125,79 @@ class Vectors:
         else:
             return None
 
+class Line:
+    """
+    A class that takes two vectors of type Vector by me (see above for details) that
+    represent the starting point and the direction of the line.
+    It can return the line as string, calculate its intersection points and its normal vector.
+    """
+    def __init__(self, s: Vector, r: Vector):
+        if s.dimensions != r.dimensions or r.zero:
+            raise ValueError("not same dimensions or zero vector as r")
+        else:
+            self.s, self.r = s, r
+
+    def __str__(self):
+        return str(self.s) + " + r * " + str(self.r)
+
+    def __intersection_point(self, index):
+        if self.r.coords[index] != 0:
+            point = []
+            location = -self.s.coords[index] / self.r.coords[index]
+            for i, j in zip(self.s.coords, self.r.coords):
+                point.append(Tools.customround(i + location * j, 2))
+            return point
+        else:
+            return None
+
+    def intersections(self):
+        if self.s.dimensions == 2:
+            return False
+        else:
+            points = []
+            for i in range(2, -1, -1):
+                points.append(self.__intersection_point(i))
+            return points
+
+    def normal_vector(self):
+        return self.r.normal_vector()
+
+    def probe_point(self, p: list):
+        if len(point) == s.dimensions:
+            point = []
+            try:
+                for i in point:
+                    point.append(decimal.Decimal(str(i)))
+            except decimal.InvalidOperation:
+                raise ValueError
+        else:
+            return False
+        i, s2, r2 = 0, self.s.coords, self.r.coords
+        while i < len(r2) - 1 and r2[i] == (point[i] - s2[i]) == 0:
+            i += 1
+        try:
+            first = (point[i] - s2[i]) / r2[i]
+            for one, two, three in zip(point[i+1:], s2[i+1:], r2[i+1:]):
+                if not ((one - two) == three == 0) and (one - two) / three != first:
+                    return False
+        except decimal.DivisionByZero:
+            return False
+        return True
+
 class Lines:
     """
     A class that takes two lines of type Line by me (see above for details).
-    It can calculate the relation of the two lines (parallel/identical, crossing or nothing).
+    It can calculate the relation of the two lines (parallel/identical, crossing or skew).
     It can also calculate their angle, their normal vector and if they are othogonal.
     The relation function returns an array where index 0 represents the relation:
     0: identical
     1: parallel
     2: crossing with point at index 1
-    3: no relation
+    3: skew
     """
     def __init__(self, a: Line, b: Line):
         if a.s.dimensions != b.s.dimensions:
-            print("not same dimensions")
-            raise ValueError
+            raise ValueError("not same dimensions")
         self.a, self.b = a, b
 
     def __str__(self):
@@ -246,3 +264,13 @@ class Lines:
 
     def normal_vector(self):
         return Vectors(self.a.r, self.b.r).normal_vector()
+
+class Level:
+    def __init__(self, s: Vector, u: Vector, v: Vector):
+        if not s.dimensions == u.dimensions == v.dimensions\
+            or u.zero or v.zero or Vectors(u, v).kolinear():
+            raise ValueError("not same dimensions or zero vector or parallel")
+        self.s, self.u, self.v = s, u, v
+
+    def __str__(self):
+        return str(s) + " + r * " + str(u) + " + s * " + str(v)

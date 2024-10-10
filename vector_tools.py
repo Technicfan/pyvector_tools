@@ -1,5 +1,6 @@
 import math
 import decimal
+from sympy import solve, abc
 
 class Tools:
     def customround(number, decimals=None):
@@ -18,7 +19,7 @@ class Vector:
     def __init__(self, coords: list):
         try:
             if len(coords) not in [2,3]:
-                raise decimal.DivisionByZero
+                raise decimal.InvalidOperation
             self.coords = []
             for i in coords:
                 self.coords.append(decimal.Decimal(str(i)))
@@ -26,10 +27,11 @@ class Vector:
             raise ValueError("wrong type or length")
 
         self.dimensions = len(self.coords)
-        if self.length() == 0:
-            self.zero = True
-        else:
-            self.zero = False
+        self.zero = True
+        for i in self.coords:
+            if i != 0:
+                self.zero = False
+                break
 
     def __str__(self):
         return "(" + ", ".join(str(i) for i in self.coords) + ")"
@@ -220,25 +222,20 @@ class Lines:
         return True
 
     def crossing(self):
-        first_part, second_part = [], []
+        equations = []
         s1, s2, r1, r2 = self.a.s.coords, self.b.s.coords, self.a.r.coords, self.b.r.coords
         for x, y, a1, a2 in zip(r1, r2, s1, s2):
-            first_part.append([x, -y])
-            second_part.append(a2 - a1)
-
-        try:
-            x = ( first_part[1][1] * second_part[0] - first_part[0][1] * second_part[1] ) /\
-                ( first_part[0][0] * first_part[1][1] - first_part[0][1] * first_part[1][0] )
-            y = ( second_part[0] - first_part[0][0] * x ) / first_part[0][1]
-        except decimal.DivisionByZero:
+            equations.append(a1 - a2 + x * abc.x - y * abc.y)
+            
+        results = solve(equations, [abc.x, abc.y])
+        
+        if results == []:
             return False
-        if len(first_part) == 3 and first_part[2][0] * x + first_part[2][1] * y != second_part[2]:
-            return False
-
-        point = []
-        for one, two in zip(s1, r1):
-            point.append(Tools.customround(one + x * two, 2))
-        return point
+        else:
+            point = []
+            for one, two in zip(s1, r1):
+                point.append(Tools.customround(one + results[abc.x] * two, 2))
+            return point
 
     def relation(self):
         if self.parallel():
@@ -267,10 +264,25 @@ class Lines:
 
 class Level:
     def __init__(self, s: Vector, u: Vector, v: Vector):
-        if not s.dimensions == u.dimensions == v.dimensions\
+        if not s.dimensions == u.dimensions == v.dimensions == 3\
             or u.zero or v.zero or Vectors(u, v).kolinear():
-            raise ValueError("not same dimensions or zero vector or parallel")
+            raise ValueError("not 3 dimensions or zero vector or parallel")
         self.s, self.u, self.v = s, u, v
 
     def __str__(self):
         return str(s) + " + r * " + str(u) + " + s * " + str(v)
+
+    def cross_line(self, line: Line):
+        equations = []
+        for s1, u, v, s2, r in zip(self.s.coords, self.u.coords, self.v.coords, line.s.coords, line.r.coords):
+            equations.append(s1 - s2 + u * abc.x + v * abc.y - r * abc.z)
+
+        results = solve(equations, [abc.x, abc.y, abc.z])
+
+        if results == []:
+            return False
+        else:
+            point = []
+            for s, r in zip(line.s.coords, line.r.coords):
+                point.append(s + result[abc.z] * r)
+            return point

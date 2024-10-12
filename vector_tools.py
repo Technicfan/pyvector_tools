@@ -14,14 +14,14 @@ class Tools:
     def solve(A, b, floating=False) -> list:
         """
         a function that solves a linear equation system 
-        of the for Ax = b using gaussian elimination
-        - it takes two matrices which represent the equations
+        of the form Ax = b using gaussian elimination
+        - it takes two matrices which represent the equations with the first being non singular
         - the number of the equations must be the same as the number of coefficients
-        - it returns a list of decimal.Decimal or float if third parameter is True
+        - it returns a matrix in form of a list of decimal.Decimal or float if third parameter is True
         example:
             a = [[9,3,4],[4,3,4],[1,1,1]]
             b = [[7],[8],[3]]
-            -> returns [-0.2, 4, -0.8]
+                -> returns [[-0.2], [4], [-0.8]]
         """
         invalid = False
         for i in range(len(A)):
@@ -56,26 +56,26 @@ class Tools:
         for i in range(length):
             matrix[i].reverse()
         try:
-            results = [matrix[0][0] / matrix[0][1]]
+            results = [[matrix[0][0] / matrix[0][1]]]
             for i in range(1, length):
                 test = matrix[i][0]
                 for j in range(1, i + 1):
-                    test -= matrix[i][j] * results[j-1]
-                results.append(test / matrix[i][i+1])
-        except decimal.DivisionByZero:
+                    test -= matrix[i][j] * results[j-1][0]
+                results.append([test / matrix[i][i+1]])
+        except (decimal.DivisionByZero, decimal.InvalidOperation):
             return []
         results.reverse()
 
         if floating:
-            return list(map(float, results))
-        else:
-            return results
+            for i in range(length):
+                results[i][0] = float(results[i][0])
+        return results
 
     def validate(a, b, r) -> bool:
         for eq, res in zip(a, b):
             result = 0
             for i in range(len(eq)):
-                result += eq[i] * r[i]
+                result += eq[i] * r[i][0]
             if result != res[0]:
                 return False
         return True
@@ -301,11 +301,10 @@ class Lines:
         
         if results == [] or (len(s1) == 3 and not Tools.validate(left[2:], right[2:], results)):
             return False
-        #elif len(s1) == 3 and left[-1][0] * results[0] + left[-1][1] * results[1] == right[-1]:
         else:
             point = []
             for one, two in zip(s1, r1):
-                point.append(Tools.customround(one + results[0] * two, 2))
+                point.append(Tools.customround(one + results[0][0] * two, 2))
             return point
 
     def relation(self):
@@ -344,16 +343,17 @@ class Level:
         return str(s) + " + r * " + str(u) + " + s * " + str(v)
 
     def cross_line(self, line: Line):
-        equations = []
+        left, right = [], []
         for s1, u, v, s2, r in zip(self.s.coords, self.u.coords, self.v.coords, line.s.coords, line.r.coords):
-            equations.append(s1 - s2 + u * abc.x + v * abc.y - r * abc.z)
+            left.append([u, v, -r])
+            right.append([s2 - s1])
 
-        results = solve(equations, [abc.x, abc.y, abc.z])
+        results = Tools.solve(left, right)
 
         if results == []:
             return False
         else:
             point = []
             for s, r in zip(line.s.coords, line.r.coords):
-                point.append(s + result[abc.z] * r)
+                point.append(s + result[2][0] * r)
             return point

@@ -19,10 +19,17 @@ class Tools:
         - the number of the equations must be the same as the number of coefficients
         - it returns a matrix in form of a list of decimal.Decimal or float if third parameter is True
         example:
-            a = [[9,3,4],[4,3,4],[1,1,1]]
-            b = [[7],[8],[3]]
-                -> returns [[-0.2], [4], [-0.8]]
+            A = [[9,3,4],
+                 [4,3,4],
+                 [1,1,1]]
+            b = [[7],
+                 [8],
+                 [3]]
+                -> returns [[-0.2], 
+                            [ 4  ], 
+                            [-0.8]]
         """
+        # check if all lists have the same length
         invalid = False
         for i in range(len(A)):
             if len(A[i]) != len(b) or len(b[i]) != 1:
@@ -31,6 +38,7 @@ class Tools:
         if len(A) != len(b) or invalid:
             raise ValueError("invalid matrix sizes")
 
+        # copy input to a single array to work with
         matrix = copy(A)
         length = len(matrix)
         for i in range(length):
@@ -38,12 +46,17 @@ class Tools:
             for j in range(length + 1):
                 matrix[i][j] = decimal.Decimal(matrix[i][j])
 
+        # make sure first item not 0
+        # and if not possible exit
         for i in range(1, length):
             if matrix[0][0] == 0:
                 matrix[0], matrix[i] = matrix[i], matrix[0]
             else:
                 break
+        if matrix[0][0] == 0:
+            return []
 
+        # make gauss magic happen :)
         for i in range(length):
             for line in range(1, length - i):
                 top = matrix[i][i]
@@ -52,6 +65,7 @@ class Tools:
                     matrix[-line][row] *= top
                     matrix[-line][row] -= bottom * matrix[i][row]
 
+        # solve the resulting system
         matrix.reverse()
         for i in range(length):
             matrix[i].reverse()
@@ -66,13 +80,26 @@ class Tools:
             return []
         results.reverse()
 
+        # return results and convert them to float if needed
         if floating:
             for i in range(length):
                 results[i][0] = float(results[i][0])
         return results
 
-    def validate(a, b, r) -> bool:
-        for eq, res in zip(a, b):
+    def validate(A, b, r) -> bool:
+        """
+        check if result of solve() (above) is true
+        input the two matrices like above and the results
+        to check in the same form
+        """
+        invalid = False
+        for i in range(len(A)):
+            if len(A[i]) != len(r) or len(b[i]) != 1 or len(r[i]) != 1:
+                invalid = True
+                break
+        if invalid:
+            return False
+        for eq, res in zip(A, b):
             result = 0
             for i in range(len(eq)):
                 result += eq[i] * r[i][0]

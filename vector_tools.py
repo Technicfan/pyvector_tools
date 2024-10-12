@@ -1,6 +1,6 @@
 import math
 import decimal
-from sympy import solve, abc
+from copy import deepcopy as copy
 
 class Tools:
     def customround(number, decimals=None):
@@ -10,6 +10,75 @@ class Tools:
             return rounded
         else:
             return int(number)
+
+    def solve(A, b, floating=False) -> list:
+        """
+        a function that solves a linear equation system 
+        of the for Ax = b using gaussian elimination
+        - it takes two matrices which represent the equations
+        - the number of the equations must be the same as the number of coefficients
+        - it returns a list of decimal.Decimal or float if third parameter is True
+        example:
+            a = [[9,3,4],[4,3,4],[1,1,1]]
+            b = [[7],[8],[3]]
+            -> returns [-0.2, 4, -0.8]
+        """
+        invalid = False
+        for i in range(len(A)):
+            if len(A[i]) != len(b) or len(b[i]) != 1:
+                invalid = True
+                break
+        if len(A) != len(b) or invalid:
+            raise ValueError("invalid matrix sizes")
+
+        matrix = copy(A)
+        length = len(matrix)
+        for i in range(length):
+            matrix[i].append(b[i][0])
+            for j in range(length + 1):
+                matrix[i][j] = decimal.Decimal(matrix[i][j])
+
+        for i in range(1, length):
+            if matrix[0][0] == 0:
+                matrix[0], matrix[i] = matrix[i], matrix[0]
+            else:
+                break
+
+        for i in range(length):
+            for line in range(1, length - i):
+                top = matrix[i][i]
+                bottom = matrix[-line][i]
+                for row in range(length + 1):
+                    matrix[-line][row] *= top
+                    matrix[-line][row] -= bottom * matrix[i][row]
+
+        matrix.reverse()
+        for i in range(length):
+            matrix[i].reverse()
+        try:
+            results = [matrix[0][0] / matrix[0][1]]
+            for i in range(1, length):
+                test = matrix[i][0]
+                for j in range(1, i + 1):
+                    test -= matrix[i][j] * results[j-1]
+                results.append(test / matrix[i][i+1])
+        except decimal.DivisionByZero:
+            return []
+        results.reverse()
+
+        if floating:
+            return list(map(float, results))
+        else:
+            return results
+
+    def validate(a, b, r) -> bool:
+        for eq, res in zip(a, b):
+            result = 0
+            for i in range(len(eq)):
+                result += eq[i] * r[i]
+            if result != res[0]:
+                return False
+        return True
 
 class Vector:
     """
@@ -222,19 +291,21 @@ class Lines:
         return True
 
     def crossing(self):
-        equations = []
+        left, right = [], []
         s1, s2, r1, r2 = self.a.s.coords, self.b.s.coords, self.a.r.coords, self.b.r.coords
         for x, y, a1, a2 in zip(r1, r2, s1, s2):
-            equations.append(a1 - a2 + x * abc.x - y * abc.y)
+            left.append([x, -y])
+            right.append([a2 -a1])
             
-        results = solve(equations, [abc.x, abc.y])
+        results = Tools.solve(left[:2], right[:2])
         
-        if results == []:
+        if results == [] or (len(s1) == 3 and not Tools.validate(left[2:], right[2:], results)):
             return False
+        #elif len(s1) == 3 and left[-1][0] * results[0] + left[-1][1] * results[1] == right[-1]:
         else:
             point = []
             for one, two in zip(s1, r1):
-                point.append(Tools.customround(one + results[abc.x] * two, 2))
+                point.append(Tools.customround(one + results[0] * two, 2))
             return point
 
     def relation(self):

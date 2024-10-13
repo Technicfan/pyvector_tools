@@ -177,13 +177,10 @@ class App(ctk.CTk):
         tv.lblGeraden.place(relx=0.5, rely=0.68, anchor=ctk.CENTER)
 
         tv.lblGeradenBeziehung= ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
-        tv.lblGeradenBeziehung.place(relx=0.5, rely=0.78, anchor=ctk.CENTER)
-
-        tv.lblGeradenWinkel = ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
-        tv.lblGeradenWinkel.place(relx=0.5, rely=0.86, anchor=ctk.CENTER)
+        tv.lblGeradenBeziehung.place(relx=0.5, rely=0.8, anchor=ctk.CENTER)
 
         tv.lblGeradenNormal = ctk.CTkLabel(tv.tab("Geradenbeziehungen"), text="")
-        tv.lblGeradenNormal.place(relx=0.5, rely=0.94, anchor=ctk.CENTER)
+        tv.lblGeradenNormal.place(relx=0.5, rely=0.9, anchor=ctk.CENTER)
 
     def clear(self, tab):
         tv = self.tab_view
@@ -205,7 +202,6 @@ class App(ctk.CTk):
                 tv.lblGeraden.configure(text="")
                 tv.lblGeradenBeziehung.configure(text="")
                 tv.lblGeradenNormal.configure(text="")
-                tv.lblGeradenWinkel.configure(text="")
 
     def btnDimensions_callback(self, option):
         tv = self.tab_view
@@ -269,8 +265,7 @@ class App(ctk.CTk):
             return
         self.tab_view.lblVektoren.configure(text="Vektoren: " + str(ab))
         self.tab_view.lblVektorenSkalar.configure(text="Skalarprodukt: " + str(ab.dot_product()))
-        parallel = ab.kolinear()
-        if parallel:
+        if ab.kolinear():
             self.tab_view.lblVektorenWinkel.configure(text="Winkel: 0° -> kolinear")
         elif ab.orthogonal():
             self.tab_view.lblVektorenWinkel.configure(text="Winkel: 90° -> orthogonal")
@@ -337,14 +332,11 @@ class App(ctk.CTk):
                 relation = "Die Geraden sind parallel."
             case 2:
                 relation = "Die Geraden schneiden sich im Punkt S(" + \
-                            "|".join(str(i) for i in result[1]) + ")."
+                            "|".join(str(i) for i in result[1]) + ")" + \
+                                "\nmit eine Winkel von " + str(ab.small_angle()) + "°."
             case 3:
                 relation = "Die Geraden sind windschief."
         self.tab_view.lblGeradenBeziehung.configure(text=relation)
-        if ab.orthogonal():
-            self.tab_view.lblGeradenWinkel.configure(text="Winkel: 90°")
-        else:
-            self.tab_view.lblGeradenWinkel.configure(text="Winkel: " + str(ab.small_angle()) + "°")
         normal = ab.normal_vector()
         if normal != None:
             self.tab_view.lblGeradenNormal.configure(text="Normalenvektor: " + str(normal))

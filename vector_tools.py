@@ -1,5 +1,5 @@
-import math
-import decimal
+from decimal import Decimal, InvalidOperation
+from math import acos, degrees
 from copy import deepcopy as copy
 
 class Tools:
@@ -43,7 +43,7 @@ class Tools:
         matrix = copy(A[:length])
         for i in range(length):
             matrix[i].append(b[i][0])
-            matrix[i] = list(map(decimal.Decimal, matrix[i]))
+            matrix[i] = list(map(Decimal, matrix[i]))
 
         # make sure first item not 0
         # and if not possible exit
@@ -95,10 +95,16 @@ class Tools:
         to check in the same form
         """
         invalid = False
-        for i in range(len(A)):
-            if len(A[i]) != len(r) or len(b[i]) != 1 or len(r[i]) != 1:
+        try:
+            for i in range(len(A)):
+                if len(A[i]) != len(r) or len(b[i]) != 1:
+                    invalid = True
+                    break
+        except IndexError:
+            invalid = True
+        for i in r:
+            if len(i) != 1:
                 invalid = True
-                break
         if invalid:
             return False
         for eq, res in zip(A, b):
@@ -117,11 +123,9 @@ class Vector:
     def __init__(self, coords: list):
         try:
             if len(coords) not in [2,3]:
-                raise decimal.InvalidOperation
-            self.coords = []
-            for i in coords:
-                self.coords.append(decimal.Decimal(str(i)))
-        except (decimal.DivisionByZero, decimal.InvalidOperation):
+                raise InvalidOperation
+            self.coords = [Decimal(str(i)) for i in coords]
+        except InvalidOperation:
             raise ValueError("wrong type or length")
 
         self.dimensions = len(self.coords)
@@ -139,9 +143,9 @@ class Vector:
         for coord in self.coords:
             under += coord**2
         if round:
-            return Tools.customround(math.sqrt(under), 2)
+            return Tools.customround(under**Decimal(0.5), 2)
         else:
-            return decimal.Decimal(math.sqrt(under))
+            return under**Decimal(0.5)
 
     def normal_vector(self):
         if self.zero:
@@ -168,7 +172,7 @@ class Vector:
 class Vectors:
     """
     A class that takes two vectors of type Vector by me (see above for details).
-    It can return them as string, calculate their dot product, their angle, check
+    It can return them as string, calculate their dot and cross product, their angle, check
     if they are orthogonal or kolinear and calculate their normal vector.
     """
     def __init__(self, a: Vector, b: Vector):
@@ -188,40 +192,36 @@ class Vectors:
         else:
             return product
 
-    def orthogonal(self):
-        return self.dot_product() == 0
-
-    def angle(self):
-        return Tools.customround(math.degrees(math.acos(self.dot_product(False) /\
-                 (self.a.length(False) * self.b.length(False)))), 2)
-
-    def small_angle(self):
-        return Tools.customround(math.degrees(math.acos(abs(self.dot_product(False) /\
-                 (self.a.length(False) * self.b.length(False))))), 2)
-
-    def kolinear(self):
-        i, a, b = 0, self.a.coords, self.b.coords
-        while i < len(a) - 1 and a[i] == b[i] == 0:
-            i += 1
-        try:
-            first = a[i] / b[i]
-            for one, two in zip(a[i+1:], b[i+1:]):
-                if not (one == two == 0) and one / two != first:
-                    return False
-        except decimal.DivisionByZero:
-            return False
-        return True
-
-    def normal_vector(self):
+    def cross_product(self):
         a, b = self.a, self.b
-        parallel = self.kolinear()
-        if parallel:
-                return a.normal_vector()
-        elif a.dimensions == 3:
+        if a.dimensions == 3:
             x = Tools.customround(a.coords[1] * b.coords[2] - a.coords[2] * b.coords[1], 2)
             y = Tools.customround(a.coords[2] * b.coords[0] - a.coords[0] * b.coords[2], 2)
             z = Tools.customround(a.coords[0] * b.coords[1] - a.coords[1] * b.coords[0], 2)
             return Vector([x, y, z])
+        else:
+            return None
+
+    def orthogonal(self):
+        return self.dot_product() == 0
+
+    def angle(self):
+        return Tools.customround(degrees(acos(self.dot_product(False) /\
+                 (self.a.length(False) * self.b.length(False)))), 2)
+
+    def small_angle(self):
+        return Tools.customround(degrees(acos(abs(self.dot_product(False) /\
+                 (self.a.length(False) * self.b.length(False))))), 2)
+
+    def kolinear(self):
+        left, right = [[i] for i in self.a.coords], [[i] for i in self.b.coords]
+        return Tools.solve(left, right) != []
+
+    def normal_vector(self):
+        if self.kolinear():
+            return self.a.normal_vector()
+        elif self.a.dimensions == 3:
+            return self.cross_product()
         else:
             return None
 
@@ -267,22 +267,16 @@ class Line:
             point = []
             try:
                 for i in point:
-                    point.append(decimal.Decimal(str(i)))
-            except decimal.InvalidOperation:
-                raise ValueError
+                    point.append(Decimal(str(i)))
+            except InvalidOperation:
+                raise ValueError("wrong input type")
         else:
             return False
-        i, s2, r2 = 0, self.s.coords, self.r.coords
-        while i < len(r2) - 1 and r2[i] == (point[i] - s2[i]) == 0:
-            i += 1
-        try:
-            first = (point[i] - s2[i]) / r2[i]
-            for one, two, three in zip(point[i+1:], s2[i+1:], r2[i+1:]):
-                if not ((one - two) == three == 0) and (one - two) / three != first:
-                    return False
-        except decimal.DivisionByZero:
-            return False
-        return True
+        right = []
+        left = [[i] for i in self.r.coords]
+        for s, p in zip(self.s.coords, point):
+            right.append([p - s])
+        return Tools.solve(left, right) != []
 
 class Lines:
     """
@@ -307,24 +301,17 @@ class Lines:
         return Vectors(self.a.r, self.b.r).kolinear()
 
     def identical(self):
-        i, s1, s2, r2 = 0, self.a.s.coords, self.b.s.coords, self.b.r.coords
-        while i < len(r2) - 1 and r2[i] == (s1[i] - s2[i]) == 0:
-            i += 1
-        try:
-            first = (s1[i] - s2[i]) / r2[i]
-            for one, two, three in zip(s1[i+1:], s2[i+1:], r2[i+1:]):
-                if not ((one - two) == three == 0) and (one - two) / three != first:
-                    return False
-        except decimal.DivisionByZero:
-            return False
-        return True
+        left, right = [[i] for i in self.b.r.coords], []
+        for s1, s2 in zip(self.a.s.coords, self.b.s.coords):
+            right.append([s1 - s2])
+        return Tools.solve(left, right) != []
 
     def crossing(self):
         left, right = [], []
         s1, s2, r1, r2 = self.a.s.coords, self.b.s.coords, self.a.r.coords, self.b.r.coords
         for x, y, a1, a2 in zip(r1, r2, s1, s2):
             left.append([x, -y])
-            right.append([a2 -a1])
+            right.append([a2 - a1])
 
         results = Tools.solve(left, right)
 
@@ -353,10 +340,16 @@ class Lines:
         return Vectors(self.a.r, self.b.r).orthogonal()
 
     def angle(self):
-        return Vectors(self.a.r, self.b.r).angle()
+        if self.crossing():
+            return Vectors(self.a.r, self.b.r).angle()
+        else:
+            return None
 
     def small_angle(self):
-        return Vectors(self.a.r, self.b.r).small_angle()
+        if self.crossing():
+            return Vectors(self.a.r, self.b.r).small_angle()
+        else:
+            return None
 
     def normal_vector(self):
         return Vectors(self.a.r, self.b.r).normal_vector()
@@ -371,7 +364,7 @@ class Level:
     def __str__(self):
         return str(s) + " + r * " + str(u) + " + s * " + str(v)
 
-    def cross_line(self, line: Line):
+    def probe_line(self, line: Line):
         left, right = [], []
         for s1, u, v, s2, r in zip(self.s.coords, self.u.coords, self.v.coords, line.s.coords, line.r.coords):
             left.append([u, v, -r])

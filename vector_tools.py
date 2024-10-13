@@ -5,8 +5,7 @@ from copy import deepcopy as copy
 class Tools:
     def customround(number, decimals=None):
         rounded = float(round(number, decimals))
-        part = rounded - int(number)
-        if part != 0:
+        if rounded - int(number) != 0:
             return rounded
         else:
             return int(number)
@@ -17,7 +16,8 @@ class Tools:
         of the form Ax = b using gaussian elimination
         - it takes two matrices which represent the equations with the first being non singular
         - the number of the equations must be the same as the number of coefficients
-        - it returns a matrix in form of a list of decimal.Decimal or float if third parameter is True
+        - it returns a matrix in form of a list of decimal.Decimal 
+          or float if third parameter is True
         example:
             A = [[9,3,4],
                  [4,3,4],
@@ -44,7 +44,7 @@ class Tools:
         for i in range(length):
             matrix[i].append(b[i][0])
             for j in range(length + 1):
-                matrix[i][j] = decimal.Decimal(matrix[i][j])
+                matrix[i][j] = matrix[i][j]
 
         # make sure first item not 0
         # and if not possible exit
@@ -58,33 +58,33 @@ class Tools:
 
         # make gauss magic happen :)
         for i in range(length):
-            for line in range(1, length - i):
-                top = matrix[i][i]
-                bottom = matrix[-line][i]
+            for line in range(length):
+                top, bottom = matrix[i][i], matrix[line][i]
                 for row in range(length + 1):
-                    matrix[-line][row] *= top
-                    matrix[-line][row] -= bottom * matrix[i][row]
+                    matrix[line][row] *= top
+                    matrix[line][row] -= bottom * matrix[i][row]
 
-        # solve the resulting system
+        # reverse everything for easier solving
         matrix.reverse()
         for i in range(length):
             matrix[i].reverse()
-        try:
-            results = [[matrix[0][0] / matrix[0][1]]]
-            for i in range(1, length):
-                test = matrix[i][0]
-                for j in range(1, i + 1):
-                    test -= matrix[i][j] * results[j-1][0]
-                results.append([test / matrix[i][i+1]])
-        except (decimal.DivisionByZero, decimal.InvalidOperation):
-            return []
+        # solve the resulting system
+        results = []
+        for i in range(length):
+            result = matrix[i][0]
+            for j in range(i):
+                result -= matrix[i][j + 1] * results[j][0]
+            if matrix[i][i + 1] != 0:
+                results.append([result / matrix[i][i + 1]])
+            else:
+                return []
         results.reverse()
 
         # return results and convert them to float if needed
         if floating:
-            for i in range(length):
-                results[i][0] = float(results[i][0])
-        return results
+            return [[float(i[0])] for i in results]
+        else:
+            return results
 
     def validate(A, b, r) -> bool:
         """

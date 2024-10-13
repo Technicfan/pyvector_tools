@@ -15,7 +15,7 @@ class Tools:
         a function that solves a linear equation system 
         of the form Ax = b using gaussian elimination
         - it takes two matrices which represent the equations with the first being non singular
-        - the number of the equations must be the same as the number of coefficients
+        - the number of the equations must be the same or bigger as the number of coefficients
         - it returns a matrix in form of a list of decimal.Decimal 
           or float if third parameter is True
         example:
@@ -32,19 +32,18 @@ class Tools:
         # check if all lists have the same length
         invalid = False
         for i in range(len(A)):
-            if len(A[i]) != len(b) or len(b[i]) != 1:
+            if len(A) < len(A[i]) or len(b[i]) != 1:
                 invalid = True
                 break
         if len(A) != len(b) or invalid:
             raise ValueError("invalid matrix sizes")
 
-        # copy input to a single array to work with
-        matrix = copy(A)
-        length = len(matrix)
+        # copy input to a single iwth the needed length array to work with
+        length = len(A[0])
+        matrix = copy(A[:length])
         for i in range(length):
             matrix[i].append(b[i][0])
-            for j in range(length + 1):
-                matrix[i][j] = matrix[i][j]
+            matrix[i] = list(map(decimal.Decimal, matrix[i]))
 
         # make sure first item not 0
         # and if not possible exit
@@ -81,10 +80,13 @@ class Tools:
         results.reverse()
 
         # return results and convert them to float if needed
-        if floating:
-            return [[float(i[0])] for i in results]
+        if A[length:] == [] or Tools.validate(A[length:], b[length:], results):
+            if floating:
+                return [[float(i[0])] for i in results]
+            else:
+                return results
         else:
-            return results
+            return []
 
     def validate(A, b, r) -> bool:
         """
@@ -323,10 +325,10 @@ class Lines:
         for x, y, a1, a2 in zip(r1, r2, s1, s2):
             left.append([x, -y])
             right.append([a2 -a1])
-            
-        results = Tools.solve(left[:2], right[:2])
-        
-        if results == [] or (len(s1) == 3 and not Tools.validate(left[2:], right[2:], results)):
+
+        results = Tools.solve(left, right)
+
+        if results == []:
             return False
         else:
             point = []

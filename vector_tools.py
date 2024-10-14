@@ -114,7 +114,7 @@ class Tools:
             result = 0
             for i in range(len(eq)):
                 result += eq[i] * r[i][0]
-            if result != res[0]:
+            if abs(result - res[0]) > Decimal('1e-10'):
                 return False
         return True
 

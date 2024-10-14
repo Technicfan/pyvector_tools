@@ -58,11 +58,13 @@ class Tools:
         # make gauss magic happen :)
         try:
             for i in range(length):
-                for line in range(length):
-                    top, bottom = matrix[i][i], matrix[line][i]
+                for line in range(1 + i, length):
+                    #top, bottom = matrix[i][i], matrix[line][i]
+                    relation = matrix[line][i] / matrix[i][i]
                     for row in range(length + 1):
-                        matrix[line][row] *= top
-                        matrix[line][row] -= bottom * matrix[i][row]
+                        #matrix[line][row] *= top
+                        #matrix[line][row] -= bottom * matrix[i][row]
+                        matrix[line][row] -= relation * matrix[i][row]
         except Overflow:
             raise Overflow("system is to big")
 

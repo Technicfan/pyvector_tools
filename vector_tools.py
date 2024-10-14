@@ -1,4 +1,4 @@
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, Overflow
 from math import acos, degrees
 from copy import deepcopy as copy
 
@@ -56,12 +56,15 @@ class Tools:
             return []
 
         # make gauss magic happen :)
-        for i in range(length):
-            for line in range(length):
-                top, bottom = matrix[i][i], matrix[line][i]
-                for row in range(length + 1):
-                    matrix[line][row] *= top
-                    matrix[line][row] -= bottom * matrix[i][row]
+        try:
+            for i in range(length):
+                for line in range(length):
+                    top, bottom = matrix[i][i], matrix[line][i]
+                    for row in range(length + 1):
+                        matrix[line][row] *= top
+                        matrix[line][row] -= bottom * matrix[i][row]
+        except Overflow:
+            raise Overflow("system is to big")
 
         # reverse everything for easier solving
         matrix.reverse()

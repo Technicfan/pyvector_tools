@@ -26,7 +26,7 @@ class Tools:
                  [8],
                  [3]]
                 -> returns [[-0.2], 
-                            [ 4  ], 
+                            [ 4.0], 
                             [-0.8]]
         """
         # check if all lists have the same length
@@ -38,7 +38,7 @@ class Tools:
         if len(A) != len(b) or invalid:
             raise ValueError("invalid matrix sizes")
 
-        # copy input to a single iwth the needed length array to work with
+        # copy input to a single with the needed length array to work with
         length = len(A[0])
         matrix = copy(A[:length])
         for i in range(length):

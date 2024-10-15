@@ -56,17 +56,14 @@ class Tools:
             return []
 
         # make gauss magic happen :)
-        try:
-            for i in range(length):
-                for line in range(1 + i, length):
-                    #top, bottom = matrix[i][i], matrix[line][i]
+        for i in range(length):
+            for line in range(1 + i, length):
+                if matrix[i][i] != 0:
                     relation = matrix[line][i] / matrix[i][i]
-                    for row in range(length + 1):
-                        #matrix[line][row] *= top
-                        #matrix[line][row] -= bottom * matrix[i][row]
-                        matrix[line][row] -= relation * matrix[i][row]
-        except Overflow:
-            raise Overflow("system is to big")
+                else:
+                    return []
+                for row in range(length + 1):
+                    matrix[line][row] -= relation * matrix[i][row]
 
         # reverse everything for easier solving
         matrix.reverse()
@@ -116,7 +113,7 @@ class Tools:
             result = 0
             for i in range(len(eq)):
                 result += eq[i] * r[i][0]
-            if abs(result - res[0]) > Decimal('1e-10'):
+            if abs(result - res[0]) > Decimal('1e-8'):
                 return False
         return True
 
